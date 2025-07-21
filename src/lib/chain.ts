@@ -1,7 +1,9 @@
 import { sepolia as testnet } from "viem/chains";
 import { type Chain } from "viem";
 import { Network } from "alchemy-sdk";
+import { AppKitNetwork, sepolia as reown } from '@reown/appkit/networks';
 import { env } from "@/env.mjs";
+import App from "next/app";
 
 function rpcUrl(chainId: number) {
   if (typeof window !== "undefined") {
@@ -40,3 +42,4 @@ function defineAppChain(chain: ReturnType<typeof defineAlchemyChain>) {
 export const sepolia = defineAppChain(defineAlchemyChain(testnet, Network.ETH_SEPOLIA));
 
 export const chains = [sepolia] as const;
+export const reownChains: [AppKitNetwork, ...AppKitNetwork[]] = [reown];

@@ -21,10 +21,12 @@ const env = createEnv({
             .transform(str =>
                 process.env.NODE_ENV === 'production' ? `https://${str}` : `http://${str}`
             ),
+        NEXT_PUBLIC_PROJECT_ID: z.string(),
     },
     experimental__runtimeEnv: {
         NEXT_PUBLIC_VERCEL_ENV: process.env.NEXT_PUBLIC_VERCEL_ENV,
         NEXT_PUBLIC_VERCEL_URL: process.env.NEXT_PUBLIC_VERCEL_URL,
+        NEXT_PUBLIC_PROJECT_ID: process.env.NEXT_PUBLIC_PROJECT_ID,
     },
 });
 
