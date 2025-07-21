@@ -32,7 +32,6 @@ function defineAppChain(chain: ReturnType<typeof defineAlchemyChain>) {
       alchemy: chain.rpcUrls.alchemy,
       app: {
         http: [rpcUrl(chain.id)],
-        webSocket: [`${chain.rpcUrls.alchemy.webSocket[0]}/${env.NEXT_PUBLIC_ALCHEMY_API_KEY}`],
       },
     },
   };
