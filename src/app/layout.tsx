@@ -1,9 +1,10 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import { Toaster } from "@/components/ui/sonner";
-import ContextProvider from '@/context'
+import ContextProvider from "@/context";
 import "./globals.css";
 import { headers } from "next/headers";
+import { ChainProvider } from "@/components/providers/chain-data";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -30,8 +31,10 @@ export default async function RootLayout({
 
   return (
     <html lang="en">
-      <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
-        <ContextProvider cookies={cookies}>{children}</ContextProvider>
+      <body className={`${geistSans.variable} ${geistMono.variable} antialiased dark`}>
+        <ContextProvider cookies={cookies}>
+          <ChainProvider> {children}</ChainProvider>
+        </ContextProvider>
         <Toaster />
       </body>
     </html>
