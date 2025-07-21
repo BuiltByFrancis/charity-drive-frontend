@@ -7,19 +7,10 @@ import { Card, CardContent, CardFooter, CardHeader } from "../ui/card";
 import { address, abi } from "@/contracts/Token";
 import { toast } from "sonner";
 import { parseEther } from "viem";
+import { useWriteSync } from "../providers/write-sync";
 
 export const DebugClient = () => {
-  const { writeContract } = useWriteContract({
-    mutation: {
-      onError: (error) => {
-        toast.error(error.name + ": " + error.message);
-      },
-      onSuccess: () => {
-        toast.success("Transaction successful!");
-      },
-    },
-  });
-
+  const { isBusy, writeContract } = useWriteSync();
   const { user, donatedWeth, donatedToken, refetchBalance } = useChainData();
 
   function handleMintTestToken() {
@@ -34,6 +25,8 @@ export const DebugClient = () => {
       functionName: "mint",
       args: [user, parseEther("1000")],
     });
+
+    refetchBalance();
   }
 
   return (
@@ -44,7 +37,7 @@ export const DebugClient = () => {
         <p>Donated Token: {donatedToken}</p>
       </CardContent>
       <CardFooter>
-        <Button variant="outline" onClick={handleMintTestToken} disabled={user === undefined}>
+        <Button variant="outline" className="cursor-pointer" onClick={handleMintTestToken} disabled={user === undefined || isBusy}>
           Mint Test Token
         </Button>
       </CardFooter>

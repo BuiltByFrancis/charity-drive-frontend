@@ -5,6 +5,7 @@ import ContextProvider from "@/context";
 import "./globals.css";
 import { headers } from "next/headers";
 import { ChainProvider } from "@/components/providers/chain-data";
+import { WriteSyncProvider } from "@/components/providers/write-sync";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -33,7 +34,9 @@ export default async function RootLayout({
     <html lang="en">
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased dark`}>
         <ContextProvider cookies={cookies}>
-          <ChainProvider> {children}</ChainProvider>
+          <ChainProvider>
+            <WriteSyncProvider>{children}</WriteSyncProvider>
+          </ChainProvider>
         </ContextProvider>
         <Toaster />
       </body>
