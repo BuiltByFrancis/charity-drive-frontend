@@ -19,7 +19,7 @@ const WriteContext = createContext<WriteSyncData | null>(null);
 export const WriteSyncProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [isBusy, setIsBusy] = useState(false);
   const [txHash, setTxHash] = useState<`0x${string}` | undefined>();
-  const [onSuccess, setOnSuccess] = useState<() => void | undefined>();
+  const [onSuccess, setOnSuccess] = useState<(() => void) | undefined>();
 
   const { writeContract } = useWriteContract({
     mutation: {
@@ -58,10 +58,14 @@ export const WriteSyncProvider: React.FC<{ children: React.ReactNode }> = ({ chi
 
     if (isSuccess) {
       toast.success("Transaction confirmed!");
-      onSuccess?.();
+      
+      const toCall = onSuccess;
+
       setIsBusy(false);
       setTxHash(undefined);
       setOnSuccess(undefined);
+
+      toCall?.();
     } else if (isError) {
       toast.error("Transaction failed: " + error?.message);
       setIsBusy(false);

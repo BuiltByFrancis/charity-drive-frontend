@@ -61,9 +61,6 @@ export const DebugClient = () => {
         <Button variant="outline" className="cursor-pointer" onClick={handleMintTestToken} disabled={user === undefined || isBusy}>
           Mint Test Token
         </Button>
-        <Button variant="outline" className="cursor-pointer" onClick={refetch} disabled={user === undefined || isBusy}>
-          Refresh
-        </Button>
       </CardFooter>
     </Card>
   );
