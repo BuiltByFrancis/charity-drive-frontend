@@ -12,9 +12,9 @@ import { address as charityPoolAddress, abi as charityPoolAbi } from "@/contract
 interface OnchainData {
   user?: Hex;
 
-  balance?: bigint;
-  wethBalance?: bigint;
-  tokenBalance?: bigint;
+  balance: bigint;
+  wethBalance: bigint;
+  tokenBalance: bigint;
 
   donatedWeth: string;
   donatedToken: string;
@@ -36,6 +36,7 @@ export const ChainProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     queryKey: ["chainData", address],
     queryFn: async () => {
       if (!address || !client) return { balance: undefined, wethBalance: undefined, tokenBalance: undefined };
+      console.log("Fetching balance data for address:", address);
 
       const balance = await client.getBalance({ address: address as Hex, blockTag: "latest" });
       const [wethBalance, tokenBalance] = await client.multicall({
@@ -60,7 +61,6 @@ export const ChainProvider: React.FC<{ children: React.ReactNode }> = ({ childre
 
       return { balance, wethBalance, tokenBalance };
     },
-    enabled: !!address,
   });
 
   const { data: donatedData, refetch: refetchDonated } = useQuery({
@@ -94,23 +94,32 @@ export const ChainProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       donatedWeth: formatEther(data.donatedWeth ?? BigInt(0)),
       donatedToken: formatEther(data.donatedToken ?? BigInt(0)),
     }),
-    enabled: !!address,
   });
+
+  function handleRefetch() {
+    handleRefetchBalance();
+    handleRefetchDonated();
+  }
+
+  function handleRefetchBalance() {
+    refetchBalance().catch(console.error);
+  }
+
+  function handleRefetchDonated() {
+    refetchDonated().catch(console.error);
+  }
 
   const value = useMemo<OnchainData>(
     () => ({
       user: address as Hex,
-      balance: balanceData?.balance,
-      wethBalance: balanceData?.wethBalance,
-      tokenBalance: balanceData?.tokenBalance,
+      balance: balanceData?.balance ?? BigInt(0),
+      wethBalance: balanceData?.wethBalance ?? BigInt(0),
+      tokenBalance: balanceData?.tokenBalance ?? BigInt(0),
       donatedWeth: donatedData?.donatedWeth ?? "0",
       donatedToken: donatedData?.donatedToken ?? "0",
-      refetchBalance: () => refetchBalance(),
-      refetchDonated: () => refetchDonated(),
-      refetch: () => {
-        refetchBalance();
-        refetchDonated();
-      },
+      refetchBalance: handleRefetchBalance,
+      refetchDonated: handleRefetchDonated,
+      refetch: handleRefetch,
     }),
     [balanceData, donatedData]
   );

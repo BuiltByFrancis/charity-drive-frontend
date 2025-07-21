@@ -1,11 +1,9 @@
 "use client";
 
-import { useWriteContract } from "wagmi";
 import { useChainData } from "../providers/chain-data";
 import { Button } from "../ui/button";
 import { Card, CardContent, CardFooter, CardHeader } from "../ui/card";
 import { address, abi } from "@/contracts/Token";
-import { toast } from "sonner";
 import { parseEther } from "viem";
 import { useWriteSync } from "../providers/write-sync";
 
@@ -15,7 +13,6 @@ export const DebugClient = () => {
 
   function handleMintTestToken() {
     if (!user) {
-      toast.error("No user connected");
       return;
     }
 
@@ -24,9 +21,10 @@ export const DebugClient = () => {
       abi,
       functionName: "mint",
       args: [user, parseEther("1000")],
+      onReceipt: () => {
+        refetchBalance();
+      },
     });
-
-    refetchBalance();
   }
 
   return (

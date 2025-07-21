@@ -1,7 +1,6 @@
 "use client";
 
 import { useAppKit, useAppKitAccount } from "@reown/appkit/react";
-import { useEffect, useState } from "react";
 import { Button } from "./ui/button";
 
 export default function ReownConnectButton() {
