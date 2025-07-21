@@ -14,7 +14,49 @@ import { address as tokenAddress, abi as tokenABI } from "@/contracts/Token";
 
 export const DonateClient = () => {
   const { isBusy, writeContract } = useWriteSync();
-  const { user, balance, wethBalance, tokenBalance, tokenAllowance, refetch, refetchBalance } = useChainData();
+  const { user, balance, wethBalance, tokenBalance, wethAllowance, tokenAllowance, refetch, refetchBalance } = useChainData();
+
+  function handleDonateEth() {
+    if (!user) {
+      return;
+    }
+
+    // TODO: Fail early if you can't afford the gas fee
+    const onePercentEth = balance / BigInt(100);
+    const onePercentWeth = wethBalance / BigInt(100);
+
+    if (wethAllowance < onePercentWeth) {
+      handleApprove();
+    } else{
+      handleDonate();
+    }
+
+    function handleApprove() {
+      writeContract({
+        address: wethAddress,
+        abi: wethABI,
+        functionName: "approve",
+        args: [charityAddress, onePercentWeth],
+        onReceipt: () => {
+          refetchBalance();
+          handleDonate();
+        },
+      });
+    }
+
+    function handleDonate() {
+      writeContract({
+        address: charityAddress,
+        abi: charityABI,
+        functionName: "donateEther",
+        args: [onePercentWeth],
+        value: onePercentEth,
+        onReceipt: () => {
+          refetch();
+        },
+      });
+    }
+  }
 
   function handleDonateToken() {
     if (!user) {
@@ -79,7 +121,7 @@ export const DonateClient = () => {
       </CardContent>
       <CardFooter className="flex w-full justify-between">
         <div className="flex flex-row gap-2">
-          <Button variant="outline" className="cursor-pointer" onClick={handleDonateToken} disabled={user === undefined || isBusy}>
+          <Button variant="outline" className="cursor-pointer" onClick={handleDonateEth} disabled={user === undefined || isBusy}>
             Donate {formatNumber(parseFloat(formatEther(totalEther / BigInt(100))))} ETH
           </Button>
           <Button variant="outline" className="cursor-pointer" onClick={handleDonateToken} disabled={user === undefined || isBusy}>

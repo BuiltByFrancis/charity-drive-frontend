@@ -83,6 +83,9 @@ export const ChainProvider: React.FC<{ children: React.ReactNode }> = ({ childre
 
       return { balance, wethBalance, tokenBalance, wethAllowance, tokenAllowance };
     },
+    refetchOnWindowFocus: true,
+    refetchOnReconnect: true,
+    enabled: !!address && !!client,
   });
 
   const { data: donatedData, refetch: refetchDonated } = useQuery({
@@ -116,6 +119,9 @@ export const ChainProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       donatedWeth: formatEther(data.donatedWeth ?? BigInt(0)),
       donatedToken: formatEther(data.donatedToken ?? BigInt(0)),
     }),
+    refetchOnWindowFocus: true,
+    refetchOnReconnect: true,
+    enabled: !!address && !!client,
   });
 
   function handleRefetch() {

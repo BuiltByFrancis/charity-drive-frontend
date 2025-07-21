@@ -6,6 +6,7 @@ import { Card, CardContent, CardFooter, CardHeader } from "../ui/card";
 import { address, abi } from "@/contracts/Token";
 import { parseEther } from "viem";
 import { useWriteSync } from "../providers/write-sync";
+import { formatNumber } from "@/lib/utils";
 
 export const DebugClient = () => {
   const { isBusy, writeContract } = useWriteSync();
@@ -31,8 +32,8 @@ export const DebugClient = () => {
     <Card className="absolute top-6 right-6 w-80">
       <CardHeader className="text-lg font-semibold w-full">Debug</CardHeader>
       <CardContent>
-        <p>Donated WETH: {donatedWeth}</p>
-        <p>Donated Token: {donatedToken}</p>
+        <p>Donated WETH: {formatNumber(parseFloat(donatedWeth))}</p>
+        <p>Donated Token: {formatNumber(parseFloat(donatedToken))}</p>
       </CardContent>
       <CardFooter>
         <Button variant="outline" className="cursor-pointer" onClick={handleMintTestToken} disabled={user === undefined || isBusy}>
