@@ -16,6 +16,9 @@ interface OnchainData {
   wethBalance: bigint;
   tokenBalance: bigint;
 
+  wethAllowance: bigint;
+  tokenAllowance: bigint;
+
   donatedWeth: string;
   donatedToken: string;
 
@@ -35,11 +38,18 @@ export const ChainProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   const { data: balanceData, refetch: refetchBalance } = useQuery({
     queryKey: ["chainData", address],
     queryFn: async () => {
-      if (!address || !client) return { balance: undefined, wethBalance: undefined, tokenBalance: undefined };
+      if (!address || !client)
+        return {
+          balance: undefined,
+          wethBalance: undefined,
+          tokenBalance: undefined,
+          wethAllowance: undefined,
+          tokenAllowance: undefined,
+        };
       console.log("Fetching balance data for address:", address);
 
       const balance = await client.getBalance({ address: address as Hex, blockTag: "latest" });
-      const [wethBalance, tokenBalance] = await client.multicall({
+      const [wethBalance, tokenBalance, wethAllowance, tokenAllowance] = await client.multicall({
         contracts: [
           {
             address: wethAddress,
@@ -53,13 +63,25 @@ export const ChainProvider: React.FC<{ children: React.ReactNode }> = ({ childre
             functionName: "balanceOf",
             args: [address as Hex],
           },
+          {
+            address: wethAddress,
+            abi: erc20Abi,
+            functionName: "allowance",
+            args: [address as Hex, charityPoolAddress],
+          },
+          {
+            address: tokenAddress,
+            abi: erc20Abi,
+            functionName: "allowance",
+            args: [address as Hex, charityPoolAddress],
+          },
         ],
         blockTag: "latest",
         allowFailure: false,
         multicallAddress: "0xcA11bde05977b3631167028862bE2a173976CA11",
       });
 
-      return { balance, wethBalance, tokenBalance };
+      return { balance, wethBalance, tokenBalance, wethAllowance, tokenAllowance };
     },
   });
 
@@ -115,6 +137,8 @@ export const ChainProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       balance: balanceData?.balance ?? BigInt(0),
       wethBalance: balanceData?.wethBalance ?? BigInt(0),
       tokenBalance: balanceData?.tokenBalance ?? BigInt(0),
+      wethAllowance: balanceData?.wethAllowance ?? BigInt(0),
+      tokenAllowance: balanceData?.tokenAllowance ?? BigInt(0),
       donatedWeth: donatedData?.donatedWeth ?? "0",
       donatedToken: donatedData?.donatedToken ?? "0",
       refetchBalance: handleRefetchBalance,

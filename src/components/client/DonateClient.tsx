@@ -8,17 +8,51 @@ import { useWriteSync } from "../providers/write-sync";
 import { useMemo } from "react";
 import { Button } from "../ui/button";
 import { formatNumber } from "@/lib/utils";
+import { address as charityAddress, abi as charityABI } from "@/contracts/CharityPool";
+import { address as wethAddress, abi as wethABI } from "@/contracts/WETH9";
+import { address as tokenAddress, abi as tokenABI } from "@/contracts/Token";
 
 export const DonateClient = () => {
   const { isBusy, writeContract } = useWriteSync();
-  const { user, balance, wethBalance, tokenBalance, refetchBalance } = useChainData();
+  const { user, balance, wethBalance, tokenBalance, tokenAllowance, refetch, refetchBalance } = useChainData();
 
-  function handleMintTestToken() {
+  function handleDonateToken() {
     if (!user) {
       return;
     }
 
-    refetchBalance();
+    const onePercent = tokenBalance / BigInt(100);
+
+    if (tokenAllowance < onePercent) {
+      handleApprove();
+    } else{
+      handleDonate();
+    }
+
+    function handleApprove() {
+      writeContract({
+        address: tokenAddress,
+        abi: tokenABI,
+        functionName: "approve",
+        args: [charityAddress, onePercent],
+        onReceipt: () => {
+          refetchBalance();
+          handleDonate();
+        },
+      });
+    }
+
+    function handleDonate() {
+      writeContract({
+        address: charityAddress,
+        abi: charityABI,
+        functionName: "donateToken",
+        args: [tokenAddress, onePercent],
+        onReceipt: () => {
+          refetch();
+        },
+      });
+    }
   }
 
   const totalEther = useMemo(() => {
@@ -45,10 +79,10 @@ export const DonateClient = () => {
       </CardContent>
       <CardFooter className="flex w-full justify-between">
         <div className="flex flex-row gap-2">
-          <Button variant="outline" className="cursor-pointer" onClick={handleMintTestToken} disabled={user === undefined || isBusy}>
+          <Button variant="outline" className="cursor-pointer" onClick={handleDonateToken} disabled={user === undefined || isBusy}>
             Donate {formatNumber(parseFloat(formatEther(totalEther / BigInt(100))))} ETH
           </Button>
-          <Button variant="outline" className="cursor-pointer" onClick={handleMintTestToken} disabled={user === undefined || isBusy}>
+          <Button variant="outline" className="cursor-pointer" onClick={handleDonateToken} disabled={user === undefined || isBusy}>
             Donate {formatNumber(parseFloat(formatEther(tokenBalance / BigInt(100))))} Token
           </Button>
         </div>
